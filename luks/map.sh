@@ -2,7 +2,7 @@
 set -e
 
 #TODO better parameter check
-#TODO add parameters for keyfile/headerfile or working directory
+#TODO add optional parameter for working dir or keyfile/headerfile
 
 if [ $# -eq 0 ]
 then
@@ -33,17 +33,4 @@ echo "Using device mapper name: $DMNAME"
 KEYFILE="keyfile_$DEVICEID"
 HEADERFILE="luksHeader_$DEVICEID"
 
-if [ -e $KEYFILE ]
-then
-	echo "The key file exists... aborting"
-	exit 1
-fi
-if [ -e $HEADERFILE ]
-then
-	echo "The header file exists... aborting"
-	exit 1
-fi
-
-dd if=/dev/urandom bs=8192 count=1 of=$KEYFILE
-dd if=/dev/zero bs=1049600 count=1 of=$HEADERFILE
-cryptsetup luksFormat --header $HEADERFILE --key-file $KEYFILE --align-payload 0 $BLOCKDEVICE
+cryptsetup luksOpen --key-file $KEYFILE --header $HEADERFILE $BLOCKDEVICE $DMNAME
